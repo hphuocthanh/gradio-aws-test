@@ -147,7 +147,7 @@ with gr.Blocks(css='style.css') as demo:
     gr.Examples(
         examples=[
             'Hello there! How are you doing?',
-            'Can you explain to me briefly what is Python programming language?',
+            'Can you explain briefly to me what is the Python programming language?',
             'Explain the plot of Cinderella in a sentence.',
             'How many hours does it take a man to eat a Helicopter?',
             "Write a 100-word article on 'Benefits of Open-Source in AI research'",
