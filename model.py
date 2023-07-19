@@ -2,16 +2,16 @@ from threading import Thread
 from typing import Iterator
 
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer,
-                          TextIteratorStreamer)
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
 model_id = 'meta-llama/Llama-2-7b-chat-hf'
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-if device.type == 'cuda':
-    model = AutoModelForCausalLM.from_pretrained(model_id,
-                                                 load_in_8bit=True,
-                                                 device_map='auto')
+if torch.cuda.is_available():
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.float16,
+        device_map='auto'
+    )
 else:
     model = None
 tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -34,7 +34,7 @@ def run(message: str,
         top_p: float = 0.95,
         top_k: int = 50) -> Iterator[str]:
     prompt = get_prompt(message, chat_history, system_prompt)
-    inputs = tokenizer([prompt], return_tensors='pt').to(device)
+    inputs = tokenizer([prompt], return_tensors='pt').to("cuda")
 
     streamer = TextIteratorStreamer(tokenizer,
                                     timeout=10.,

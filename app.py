@@ -7,14 +7,25 @@ import gradio as gr
 import torch
 
 from model import run
-from settings import (ALLOW_CHANGING_SYSTEM_PROMPT, DEFAULT_MAX_NEW_TOKENS,
-                      DEFAULT_SYSTEM_PROMPT, MAX_MAX_NEW_TOKENS)
 
-DESCRIPTION = '# Llama-2 7B chat'
+DEFAULT_SYSTEM_PROMPT = """
+You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+"""
+MAX_MAX_NEW_TOKENS = 2048
+DEFAULT_MAX_NEW_TOKENS = 1024
+
+DESCRIPTION = """
+# Llama-2 7B Chat
+
+This Space demonstrates model [Llama-2-7b-chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) by Meta, a Llama 2 model with 7B parameters fine-tuned for chat instructions. Feel free to play with it, or duplicate to run generations without a queue! If you want to run your own service, you can also [deploy the model on Inference Endpoints](https://huggingface.co/inference-endpoints).
+
+🔎 For more details about the Llama 2 family of models and how to use them with `transformers`, take a look [at our blog post](https://huggingface.co/blog/llama2).
+
+🔨 Looking for an even more powerful model? Check out the large [70B model demo](https://huggingface.co/spaces/ysharma/Explore_llamav2_with_TGI).
+"""
+
 if not torch.cuda.is_available():
     DESCRIPTION += '\n<p>Running on CPU 🥶 This demo does not work on CPU.</p>'
-
-WRITEUP = """This Space demonstrates model [Llama-2-7b-chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) by Meta, running transformers latest release. Read more about the Llamav2 release on Huggingface in our [Blog](https://huggingface.co/blog/llama2). To have your own dedicated endpoint, you can [deploy it on Inference Endpoints](https://ui.endpoints.huggingface.co/) or duplicate the Space and provide for a GPU. We also have the [Llama-2-70b-chat-hf](https://huggingface.co/meta-llama/Llama-2-70b-chat-hf) demo running on Spaces. """ 
 
 def clear_and_save_textbox(message: str) -> tuple[str, str]:
     return '', message
@@ -35,7 +46,7 @@ def delete_prev_fn(
     return history, message or ''
 
 
-def fn(
+def generate(
     message: str,
     history_with_input: list[tuple[str, str]],
     system_prompt: str,
@@ -61,10 +72,8 @@ def fn(
 
 with gr.Blocks(css='style.css') as demo:
     gr.Markdown(DESCRIPTION)
-    gr.Markdown(WRITEUP)
     gr.DuplicateButton(value='Duplicate Space for private use',
-                       elem_id='duplicate-button',
-                       visible=os.getenv('SHOW_DUPLICATE_BUTTON') == '1')
+                       elem_id='duplicate-button')
 
     with gr.Group():
         chatbot = gr.Chatbot(label='Chatbot')
@@ -89,8 +98,7 @@ with gr.Blocks(css='style.css') as demo:
     with gr.Accordion(label='Advanced options', open=False):
         system_prompt = gr.Textbox(label='System prompt',
                                    value=DEFAULT_SYSTEM_PROMPT,
-                                   lines=6,
-                                   interactive=ALLOW_CHANGING_SYSTEM_PROMPT)
+                                   lines=6)
         max_new_tokens = gr.Slider(
             label='Max new tokens',
             minimum=1,
@@ -101,9 +109,9 @@ with gr.Blocks(css='style.css') as demo:
         temperature = gr.Slider(
             label='Temperature',
             minimum=0.1,
-            maximum=5.0,
+            maximum=4.0,
             step=0.1,
-            value=0.8,
+            value=1.0,
         )
         top_p = gr.Slider(
             label='Top-p (nucleus sampling)',
@@ -115,7 +123,7 @@ with gr.Blocks(css='style.css') as demo:
         top_k = gr.Slider(
             label='Top-k',
             minimum=1,
-            maximum=50,
+            maximum=1000,
             step=1,
             value=50,
         )
@@ -133,7 +141,7 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
-        fn=fn,
+        fn=generate,
         inputs=[
             saved_input,
             chatbot,
@@ -160,7 +168,7 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
-        fn=fn,
+        fn=generate,
         inputs=[
             saved_input,
             chatbot,
@@ -187,7 +195,7 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
-        fn=fn,
+        fn=generate,
         inputs=[
             saved_input,
             chatbot,
