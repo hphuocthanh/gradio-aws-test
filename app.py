@@ -20,7 +20,7 @@ This Space demonstrates model [Llama-2-7b-chat](https://huggingface.co/meta-llam
 
 🔎 For more details about the Llama 2 family of models and how to use them with `transformers`, take a look [at our blog post](https://huggingface.co/blog/llama2).
 
-🔨 Looking for an even more powerful model? Check out the large [70B model demo](https://huggingface.co/spaces/ysharma/Explore_llamav2_with_TGI).
+🔨 Looking for an even more powerful model? Check out the [13B version](https://huggingface.co/spaces/huggingface-projects/llama-2-13b-chat) or the large [70B model demo](https://huggingface.co/spaces/ysharma/Explore_llamav2_with_TGI).
 """
 
 LICENSE = """
