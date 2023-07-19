@@ -1,3 +1,4 @@
+import os
 from typing import Iterator
 
 import gradio as gr
@@ -31,6 +32,7 @@ this demo is governed by the original [license](LICENSE.txt) and [acceptable use
 
 if not torch.cuda.is_available():
     DESCRIPTION += '\n<p>Running on CPU 🥶 This demo does not work on CPU.</p>'
+
 
 def clear_and_save_textbox(message: str) -> tuple[str, str]:
     return '', message
@@ -73,6 +75,14 @@ def generate(
         yield history + [(message, '')]
     for response in generator:
         yield history + [(message, response)]
+
+
+def process_example(message: str) -> tuple[str, list[tuple[str, str]]]:
+    generator = generate(message, [], DEFAULT_SYSTEM_PROMPT, 1024, 0.95, 1,
+                         1000)
+    for x in generator:
+        pass
+    return '', x
 
 
 with gr.Blocks(css='style.css') as demo:
@@ -134,16 +144,19 @@ with gr.Blocks(css='style.css') as demo:
         )
 
     gr.Examples(
-        examples = [
-        ["Hello there! How are you doing?"],
-        ["Can you explain to me briefly what is Python programming language?"],
-        ["Explain the plot of Cinderella in a sentence."],
-        ["How many hours does it take a man to eat a Helicopter?"],
-        ["Write a 100-word article on 'Benefits of Open-Source in AI research'"]
-    ], 
-        inputs = textbox,
-        label = "Click on any example and press the 'Submit' button",
+        examples=[
+            'Hello there! How are you doing?',
+            'Can you explain to me briefly what is Python programming language?',
+            'Explain the plot of Cinderella in a sentence.',
+            'How many hours does it take a man to eat a Helicopter?',
+            "Write a 100-word article on 'Benefits of Open-Source in AI research'",
+        ],
+        inputs=textbox,
+        outputs=[textbox, chatbot],
+        fn=process_example,
+        cache_examples=os.getenv('CACHE_EXAMPLES') == '1',
     )
+
     gr.Markdown(LICENSE)
 
     textbox.submit(
