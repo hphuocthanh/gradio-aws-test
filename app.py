@@ -14,6 +14,7 @@ DESCRIPTION = '# Llama-2 7B chat'
 if not torch.cuda.is_available():
     DESCRIPTION += '\n<p>Running on CPU 🥶 This demo does not work on CPU.</p>'
 
+WRITEUP = """This Space demonstrates model [Llama-2-7b-chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) by Meta, running transformers latest release. Read more about the Llamav2 release on Huggingface in our [Blog](https://huggingface.co/blog/llama2). To have your own dedicated endpoint, you can [deploy it on Inference Endpoints](https://ui.endpoints.huggingface.co/) or duplicate the Space and provide for a GPU. We also have the [Llama-2-70b-chat-hf](https://huggingface.co/meta-llama/Llama-2-70b-chat-hf) demo running on Spaces. """ 
 
 def clear_and_save_textbox(message: str) -> tuple[str, str]:
     return '', message
@@ -60,6 +61,7 @@ def fn(
 
 with gr.Blocks(css='style.css') as demo:
     gr.Markdown(DESCRIPTION)
+    gr.Markdown(WRITEUP)
     gr.DuplicateButton(value='Duplicate Space for private use',
                        elem_id='duplicate-button',
                        visible=os.getenv('SHOW_DUPLICATE_BUTTON') == '1')
