@@ -28,7 +28,7 @@ LICENSE = """
 
 ---
 As a derivate work of [Llama-2-7b-chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) by Meta,
-this demo is governed by the original [license](LICENSE.txt) and [acceptable use policy](USE_POLICY.md).
+this demo is governed by the original [license](https://huggingface.co/spaces/huggingface-projects/llama-2-7b-chat/blob/main/LICENSE.txt) and [acceptable use policy](https://huggingface.co/spaces/huggingface-projects/llama-2-7b-chat/blob/main/USE_POLICY.md).
 """
 
 if not torch.cuda.is_available():
