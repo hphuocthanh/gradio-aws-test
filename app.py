@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-
-import os
 from typing import Iterator
 
 import gradio as gr
@@ -22,6 +19,14 @@ This Space demonstrates model [Llama-2-7b-chat](https://huggingface.co/meta-llam
 🔎 For more details about the Llama 2 family of models and how to use them with `transformers`, take a look [at our blog post](https://huggingface.co/blog/llama2).
 
 🔨 Looking for an even more powerful model? Check out the large [70B model demo](https://huggingface.co/spaces/ysharma/Explore_llamav2_with_TGI).
+"""
+
+LICENSE = """
+<p/>
+
+---
+As a derivate work of [Llama-2-7b-chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) by Meta,
+this demo is governed by the original [license](LICENSE.txt) and [acceptable use policy](USE_POLICY.md).
 """
 
 if not torch.cuda.is_available():
@@ -138,9 +143,9 @@ with gr.Blocks(css='style.css') as demo:
     ], 
         inputs = textbox,
         label = "Click on any example and press the 'Submit' button",
-                
-      )
-        
+    )
+    gr.Markdown(LICENSE)
+
     textbox.submit(
         fn=clear_and_save_textbox,
         inputs=textbox,
