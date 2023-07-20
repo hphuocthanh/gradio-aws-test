@@ -60,8 +60,8 @@ def generate(
     history_with_input: list[tuple[str, str]],
     system_prompt: str,
     max_new_tokens: int,
-    top_p: float,
     temperature: float,
+    top_p: float,
     top_k: int,
 ) -> Iterator[list[tuple[str, str]]]:
     if max_new_tokens > MAX_MAX_NEW_TOKENS:
@@ -79,7 +79,7 @@ def generate(
 
 
 def process_example(message: str) -> tuple[str, list[tuple[str, str]]]:
-    generator = generate(message, [], DEFAULT_SYSTEM_PROMPT, 1024, 0.95, 1, 50)
+    generator = generate(message, [], DEFAULT_SYSTEM_PROMPT, 1024, 1, 0.95, 50)
     for x in generator:
         pass
     return '', x
