@@ -247,6 +247,7 @@ with gr.Blocks(css='style.css') as demo:
         inputs=[
             saved_input,
             chatbot,
+            system_prompt,
             max_new_tokens,
             temperature,
             top_p,
