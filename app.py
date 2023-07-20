@@ -3,7 +3,7 @@ from typing import Iterator
 import gradio as gr
 import torch
 
-from model import run
+from model import get_prompt, run
 
 DEFAULT_SYSTEM_PROMPT = """\
 You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
@@ -12,6 +12,7 @@ If a question does not make any sense, or is not factually coherent, explain why
 """
 MAX_MAX_NEW_TOKENS = 2048
 DEFAULT_MAX_NEW_TOKENS = 1024
+MAX_WORD_NUM = 3000
 
 DESCRIPTION = """
 # Llama-2 7B Chat
@@ -67,8 +68,7 @@ def generate(
         raise ValueError
 
     history = history_with_input[:-1]
-    generator = run(message, history, system_prompt, max_new_tokens,
-                    temperature, top_p, top_k)
+    generator = run(message, history, system_prompt, max_new_tokens, temperature, top_p, top_k)
     try:
         first_response = next(generator)
         yield history + [(message, first_response)]
@@ -79,11 +79,16 @@ def generate(
 
 
 def process_example(message: str) -> tuple[str, list[tuple[str, str]]]:
-    generator = generate(message, [], DEFAULT_SYSTEM_PROMPT, 1024, 0.95, 1,
-                         1000)
+    generator = generate(message, [], DEFAULT_SYSTEM_PROMPT, 1024, 0.95, 1, 50)
     for x in generator:
         pass
     return '', x
+
+
+def check_prompt_length(message: str, chat_history: list[tuple[str, str]], system_prompt: str) -> None:
+    prompt = get_prompt(message, chat_history, system_prompt)
+    if len(prompt.split()) > MAX_WORD_NUM:
+        raise gr.Error('The accumulated input is too long. Clear your chat history and try again.')
 
 
 with gr.Blocks(css='style.css') as demo:
@@ -173,6 +178,11 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
+        fn=check_prompt_length,
+        inputs=[saved_input, chatbot, system_prompt],
+        api_name=False,
+        queue=False,
+    ).success(
         fn=generate,
         inputs=[
             saved_input,
@@ -200,6 +210,11 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
+        fn=check_prompt_length,
+        inputs=[saved_input, chatbot, system_prompt],
+        api_name=False,
+        queue=False,
+    ).success(
         fn=generate,
         inputs=[
             saved_input,
