@@ -3,7 +3,7 @@ from typing import Iterator
 import gradio as gr
 import torch
 
-from model import get_prompt, run, tokenizer
+from model import get_input_token_length, run
 
 DEFAULT_SYSTEM_PROMPT = """\
 You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
@@ -86,9 +86,7 @@ def process_example(message: str) -> tuple[str, list[tuple[str, str]]]:
 
 
 def check_prompt_length(message: str, chat_history: list[tuple[str, str]], system_prompt: str) -> None:
-    prompt = get_prompt(message, chat_history, system_prompt)
-    input_ids = tokenizer([prompt], return_tensors='np')['input_ids']
-    input_token_length = input_ids.shape[-1]
+    input_token_length = get_input_token_length(message, chat_history, system_prompt)
     if input_token_length > MAX_INPUT_TOKEN_LENGTH:
         raise gr.Error(f'The accumulated input is too long ({input_token_length} > {MAX_INPUT_TOKEN_LENGTH}). Clear your chat history and try again.')
 
