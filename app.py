@@ -85,7 +85,7 @@ def process_example(message: str) -> tuple[str, list[tuple[str, str]]]:
     return '', x
 
 
-def check_prompt_length(message: str, chat_history: list[tuple[str, str]], system_prompt: str) -> None:
+def check_input_token_length(message: str, chat_history: list[tuple[str, str]], system_prompt: str) -> None:
     input_token_length = get_input_token_length(message, chat_history, system_prompt)
     if input_token_length > MAX_INPUT_TOKEN_LENGTH:
         raise gr.Error(f'The accumulated input is too long ({input_token_length} > {MAX_INPUT_TOKEN_LENGTH}). Clear your chat history and try again.')
@@ -178,7 +178,7 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
-        fn=check_prompt_length,
+        fn=check_input_token_length,
         inputs=[saved_input, chatbot, system_prompt],
         api_name=False,
         queue=False,
@@ -210,7 +210,7 @@ with gr.Blocks(css='style.css') as demo:
         api_name=False,
         queue=False,
     ).then(
-        fn=check_prompt_length,
+        fn=check_input_token_length,
         inputs=[saved_input, chatbot, system_prompt],
         api_name=False,
         queue=False,
