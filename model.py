@@ -33,7 +33,7 @@ def get_prompt(message: str, chat_history: list[tuple[str, str]],
 
 def get_input_token_length(message: str, chat_history: list[tuple[str, str]], system_prompt: str) -> int:
     prompt = get_prompt(message, chat_history, system_prompt)
-    input_ids = tokenizer([prompt], return_tensors='np')['input_ids']
+    input_ids = tokenizer([prompt], return_tensors='np', add_special_tokens = False)['input_ids']
     return input_ids.shape[-1]
 
 
