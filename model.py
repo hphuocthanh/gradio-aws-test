@@ -19,10 +19,15 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 def get_prompt(message: str, chat_history: list[tuple[str, str]],
                system_prompt: str) -> str:
-    texts = [f'[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n']
+    texts = [f'<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n']
+    # The first user input is _not_ stripped
+    do_strip = False
     for user_input, response in chat_history:
-        texts.append(f'{user_input.strip()} [/INST] {response.strip()} </s><s> [INST] ')
-    texts.append(f'{message.strip()} [/INST]')
+        user_input = user_input.strip() if do_strip else user_input
+        do_strip = True
+        texts.append(f'{user_input} [/INST] {response.strip()} </s><s>[INST] ')
+    message = message.strip() if do_strip else message
+    texts.append(f'{message} [/INST]')
     return ''.join(texts)
 
 
