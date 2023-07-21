@@ -33,7 +33,7 @@ def get_prompt(message: str, chat_history: list[tuple[str, str]],
 
 def get_input_token_length(message: str, chat_history: list[tuple[str, str]], system_prompt: str) -> int:
     prompt = get_prompt(message, chat_history, system_prompt)
-    input_ids = tokenizer([prompt], return_tensors='np', add_special_tokens = False)['input_ids']
+    input_ids = tokenizer([prompt], return_tensors='np', add_special_tokens=False)['input_ids']
     return input_ids.shape[-1]
 
 
@@ -45,7 +45,7 @@ def run(message: str,
         top_p: float = 0.95,
         top_k: int = 50) -> Iterator[str]:
     prompt = get_prompt(message, chat_history, system_prompt)
-    inputs = tokenizer([prompt], return_tensors='pt').to('cuda')
+    inputs = tokenizer([prompt], return_tensors='pt', add_special_tokens=False).to('cuda')
 
     streamer = TextIteratorStreamer(tokenizer,
                                     timeout=10.,
