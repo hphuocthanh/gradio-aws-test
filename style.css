@@ -9,7 +9,7 @@ h1 {
   border-radius: 100vh;
 }
 
-#component-0 {
+.contain {
   max-width: 900px;
   margin: auto;
   padding-top: 1.5rem;
