@@ -2,6 +2,7 @@ from threading import Thread
 from typing import Iterator
 
 import gradio as gr
+import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
@@ -39,6 +40,7 @@ if torch.cuda.is_available():
     tokenizer.use_default_system_prompt = False
 
 
+@spaces.GPU
 def generate(
     message: str,
     chat_history: list[tuple[str, str]],
