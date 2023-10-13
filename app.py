@@ -6,7 +6,6 @@ import spaces
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
 
-DEFAULT_SYSTEM_PROMPT = "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."
 MAX_MAX_NEW_TOKENS = 2048
 DEFAULT_MAX_NEW_TOKENS = 1024
 MAX_INPUT_TOKEN_LENGTH = 4096
@@ -88,7 +87,7 @@ def generate(
 chat_interface = gr.ChatInterface(
     fn=generate,
     additional_inputs=[
-        gr.Textbox(label="System prompt", value=DEFAULT_SYSTEM_PROMPT, lines=6),
+        gr.Textbox(label="System prompt", lines=6),
         gr.Slider(
             label="Max new tokens",
             minimum=1,
