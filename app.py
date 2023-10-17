@@ -57,15 +57,15 @@ def generate(
         conversation.extend([{"role": "user", "content": user}, {"role": "assistant", "content": assistant}])
     conversation.append({"role": "user", "content": message})
 
-    chat = tokenizer.apply_chat_template(conversation, tokenize=False)
-    inputs = tokenizer(chat, return_tensors="pt", add_special_tokens=False).to("cuda")
-    if len(inputs) > MAX_INPUT_TOKEN_LENGTH:
-        inputs = inputs[-MAX_INPUT_TOKEN_LENGTH:]
+    input_ids = tokenizer.apply_chat_template(conversation, return_tensors="pt")
+    if input_ids.shape[1] > MAX_INPUT_TOKEN_LENGTH:
+        input_ids = input_ids[:, -MAX_INPUT_TOKEN_LENGTH:]
         gr.Warning("Trimmed input from conversation as it was longer than {MAX_INPUT_TOKEN_LENGTH} tokens.")
+    input_ids = input_ids.to(model.device)
 
     streamer = TextIteratorStreamer(tokenizer, timeout=10.0, skip_prompt=True, skip_special_tokens=True)
     generate_kwargs = dict(
-        inputs,
+        {"input_ids": input_ids},
         streamer=streamer,
         max_new_tokens=max_new_tokens,
         do_sample=True,
