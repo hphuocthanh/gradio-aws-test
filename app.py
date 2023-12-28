@@ -6,6 +6,7 @@ import gradio as gr
 import requests
 import json
 
+
 MAX_MAX_NEW_TOKENS = 2048
 DEFAULT_MAX_NEW_TOKENS = 1024
 MAX_INPUT_TOKEN_LENGTH = int(os.getenv("MAX_INPUT_TOKEN_LENGTH", "4096"))
@@ -38,9 +39,7 @@ def generate(
     #     conversation.extend([{"role": "user", "content": user}, {"role": "assistant", "content": assistant}])
     # conversation.append({"role": "user", "content": message})
 
-    API_URL = (
-        "https://rv9s7r8fx0.execute-api.ap-southeast-2.amazonaws.com/test/testllama"
-    )
+    API_URL = os.getenv("API_ENVIRONMENT")
 
     headers = {"Content-Type": "application/json"}
     payload = json.dumps({"data": {"data": "tell me about it"}})
