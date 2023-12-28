@@ -1,11 +1,10 @@
 import os
-from threading import Thread
 from typing import Iterator
 
 import gradio as gr
-import spaces
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer
+
+import requests
+import json
 
 MAX_MAX_NEW_TOKENS = 2048
 DEFAULT_MAX_NEW_TOKENS = 1024
@@ -21,26 +20,7 @@ This Space demonstrates model [Llama-2-7b-chat](https://huggingface.co/meta-llam
 🔨 Looking for an even more powerful model? Check out the [13B version](https://huggingface.co/spaces/huggingface-projects/llama-2-13b-chat) or the large [70B model demo](https://huggingface.co/spaces/ysharma/Explore_llamav2_with_TGI).
 """
 
-LICENSE = """
-<p/>
 
----
-As a derivate work of [Llama-2-7b-chat](https://huggingface.co/meta-llama/Llama-2-7b-chat) by Meta,
-this demo is governed by the original [license](https://huggingface.co/spaces/huggingface-projects/llama-2-7b-chat/blob/main/LICENSE.txt) and [acceptable use policy](https://huggingface.co/spaces/huggingface-projects/llama-2-7b-chat/blob/main/USE_POLICY.md).
-"""
-
-if not torch.cuda.is_available():
-    DESCRIPTION += "\n<p>Running on CPU 🥶 This demo does not work on CPU.</p>"
-
-
-if torch.cuda.is_available():
-    model_id = "meta-llama/Llama-2-7b-chat-hf"
-    model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto")
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    tokenizer.use_default_system_prompt = False
-
-
-@spaces.GPU
 def generate(
     message: str,
     chat_history: list[tuple[str, str]],
@@ -52,94 +32,36 @@ def generate(
     repetition_penalty: float = 1.2,
 ) -> Iterator[str]:
     conversation = []
-    if system_prompt:
-        conversation.append({"role": "system", "content": system_prompt})
-    for user, assistant in chat_history:
-        conversation.extend([{"role": "user", "content": user}, {"role": "assistant", "content": assistant}])
-    conversation.append({"role": "user", "content": message})
+    # if system_prompt:
+    #     conversation.append({"role": "system", "content": system_prompt})
+    # for user, assistant in chat_history:
+    #     conversation.extend([{"role": "user", "content": user}, {"role": "assistant", "content": assistant}])
+    # conversation.append({"role": "user", "content": message})
 
-    input_ids = tokenizer.apply_chat_template(conversation, return_tensors="pt")
-    if input_ids.shape[1] > MAX_INPUT_TOKEN_LENGTH:
-        input_ids = input_ids[:, -MAX_INPUT_TOKEN_LENGTH:]
-        gr.Warning(f"Trimmed input from conversation as it was longer than {MAX_INPUT_TOKEN_LENGTH} tokens.")
-    input_ids = input_ids.to(model.device)
-
-    streamer = TextIteratorStreamer(tokenizer, timeout=10.0, skip_prompt=True, skip_special_tokens=True)
-    generate_kwargs = dict(
-        {"input_ids": input_ids},
-        streamer=streamer,
-        max_new_tokens=max_new_tokens,
-        do_sample=True,
-        top_p=top_p,
-        top_k=top_k,
-        temperature=temperature,
-        num_beams=1,
-        repetition_penalty=repetition_penalty,
+    API_URL = (
+        "https://rv9s7r8fx0.execute-api.ap-southeast-2.amazonaws.com/test/testllama"
     )
-    t = Thread(target=model.generate, kwargs=generate_kwargs)
-    t.start()
 
-    outputs = []
-    for text in streamer:
-        outputs.append(text)
-        yield "".join(outputs)
+    headers = {"Content-Type": "application/json"}
+    payload = json.dumps({"data": {"data": "tell me about it"}})
+    print(payload)
+    response = requests.post(API_URL, data=payload, headers=headers)
+    print("response", response.json()["Body"])
+
+    return response.json()["Body"]
 
 
-chat_interface = gr.ChatInterface(
-    fn=generate,
-    additional_inputs=[
-        gr.Textbox(label="System prompt", lines=6),
-        gr.Slider(
-            label="Max new tokens",
-            minimum=1,
-            maximum=MAX_MAX_NEW_TOKENS,
-            step=1,
-            value=DEFAULT_MAX_NEW_TOKENS,
-        ),
-        gr.Slider(
-            label="Temperature",
-            minimum=0.1,
-            maximum=4.0,
-            step=0.1,
-            value=0.6,
-        ),
-        gr.Slider(
-            label="Top-p (nucleus sampling)",
-            minimum=0.05,
-            maximum=1.0,
-            step=0.05,
-            value=0.9,
-        ),
-        gr.Slider(
-            label="Top-k",
-            minimum=1,
-            maximum=1000,
-            step=1,
-            value=50,
-        ),
-        gr.Slider(
-            label="Repetition penalty",
-            minimum=1.0,
-            maximum=2.0,
-            step=0.05,
-            value=1.2,
-        ),
-    ],
-    stop_btn=None,
-    examples=[
-        ["Hello there! How are you doing?"],
-        ["Can you explain briefly to me what is the Python programming language?"],
-        ["Explain the plot of Cinderella in a sentence."],
-        ["How many hours does it take a man to eat a Helicopter?"],
-        ["Write a 100-word article on 'Benefits of Open-Source in AI research'"],
-    ],
-)
+def upload_file(files):
+    file_paths = [file.name for file in files]
+    return file_paths
 
-with gr.Blocks(css="style.css") as demo:
-    gr.Markdown(DESCRIPTION)
-    gr.DuplicateButton(value="Duplicate Space for private use", elem_id="duplicate-button")
-    chat_interface.render()
-    gr.Markdown(LICENSE)
+
+with gr.Blocks() as demo:
+    file_output = gr.File()
+    upload_button = gr.UploadButton(
+        "Click to Upload a File", file_types=["text"], file_count="single", size="lg"
+    )
+    upload_button.upload(upload_file, upload_button, file_output)
 
 if __name__ == "__main__":
-    demo.queue(max_size=20).launch()
+    demo.launch(server_name="0.0.0.0")
